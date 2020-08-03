@@ -14,9 +14,8 @@ int main(int argc, char **argv)
     int i;
     char addr[19] = { 0 };
     char name[248] = { 0 };
-
-    dev_id = hci_get_route(NULL);
-    sock = hci_open_dev(dev_id);
+    dev_id = hci_get_route(NULL); // parameter passed as (1) NULL will find out first available device (2) number will connect to the resp device
+    sock = hci_open_dev(dev_id);  // opens bluetooth socket
     if (dev_id<0||sock <0) {
         perror("opening socket");
         exit(1);
@@ -29,14 +28,15 @@ int main(int argc, char **argv)
 
     num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
     if(num_rsp<0) perror("hci_inquiry");
-
+    int count = 0;
     for (i = 0; i < num_rsp; i++) {
         ba2str(&(ii+i)->bdaddr, addr);
         memset(name, 0, sizeof(name));
         if (hci_read_remote_name(sock, &(ii+i)->bdaddr, sizeof(name), 
             name, 0) < 0)
         strcpy(name, "[unknown]");
-        printf("%s  %s\n", addr, name);
+	count++;
+        printf("%d  %s  %s\n",count, addr, name);
     }
 
     free(ii);
